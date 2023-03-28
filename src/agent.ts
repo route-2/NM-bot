@@ -25,10 +25,7 @@ export function provideHandleTx(functionAbi: string, proxy: string, deployer: st
     const createBotTx = txEvent.filterFunction(functionAbi,proxy);
   
     createBotTx.forEach((call) => {
-      const agentId = call.args[0];
-      const owner = call.args[1];
-      const metadata = call.args[2];
-      const chainIds = call.args[3];
+      const {agentId,owner,chainIds,metadata} = call.args;
       findings.push(
         Finding.fromObject({
           name: "New Nethermind Bot Created",
