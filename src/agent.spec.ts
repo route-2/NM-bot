@@ -4,15 +4,17 @@ import {
   Finding,
   HandleTransaction,
   createTransactionEvent,
-  ethers,
 } from "forta-agent";
 import { createAddress } from "forta-agent-tools";
 import { provideHandleTx } from "./agent";
 import { TestTransactionEvent } from "forta-agent-tools/lib/test";
-import { Interface } from "ethers/lib/utils";
+import { Interface } from "ethers";
+import ethers from "ethers";
 import { BigNumber } from "ethers";
-import { NETHERMIND_DEPLOYER_ADDRESS,CREATE_AGENT,FORTA_CONTRACT_ADDRESS } from "./utils";
 
+
+import { NETHERMIND_DEPLOYER_ADDRESS,CREATE_AGENT,FORTA_CONTRACT_ADDRESS } from "./utils";
+const number = BigNumber;
 const TEST_DATA_1 = {
   agentId:BigNumber.from("444"),
             owner:createAddress("0x4"),
@@ -30,60 +32,22 @@ const TEST_DEPLOYER_ADDRESS = createAddress("0x123");
 const TEST_FORTA_ADDRESS = createAddress("0x456");
 
 
-describe("Nethermind Bot deploying agent", () => {
+describe("Nethermind Agent", () => {
   let handleTransaction: HandleTransaction;
-  const mockTxEvent = createTransactionEvent({} as any);
+  let fortaProxy = new Interface([CREATE_AGENT]);
 
   beforeAll(() => {
-    handleTransaction = agent.handleTransaction;
-  });
+    handleTransaction = provideHandleTx(CREATE_AGENT,TEST_DEPLOYER_ADDRESS,TEST_FORTA_ADDRESS);
+  }
+  );
 
-  describe("handleTransaction", () => {
-    it("returns empty findings if there are no  tx", async () => {
-      let proxy = new Interface([CREATE_AGENT]);
-      
-      mockTxEvent.filterLog = jest.fn().mockReturnValue([]);
+  it("returns empty findings if no transactions", async () => {
+    const txEvent = new TestTransactionEvent();
+    const findings = await handleTransaction(txEvent);
+    expect(findings).toStrictEqual([]);
+  }
+  );
+  
 
-      const findings = await handleTransaction(mockTxEvent);
 
-      expect(findings).toStrictEqual([]);
-      
-
-    it("returns a finding if there is one", async () => {
-      const mockTetherTransferEvent = {
-        args: {
-          from: "0xabc",
-          to: "0xdef",
-          value: ethers.BigNumber.from("20000000000"), //20k with 6 decimals
-        },
-      };
-      mockTxEvent.filterLog = jest
-        .fn()
-        .mockReturnValue([mockTetherTransferEvent]);
-
-      const findings = await handleTransaction(mockTxEvent);
-
-      const normalizedValue = mockTetherTransferEvent.args.value.div(
-        10 ** TETHER_DECIMALS
-      );
-      expect(findings).toStrictEqual([
-        Finding.fromObject({
-          name: "High Tether Transfer",
-          description: `High amount of USDT transferred: ${normalizedValue}`,
-          alertId: "FORTA-1",
-          severity: FindingSeverity.Low,
-          type: FindingType.Info,
-          metadata: {
-            to: mockTetherTransferEvent.args.to,
-            from: mockTetherTransferEvent.args.from,
-          },
-        }),
-      ]);
-      expect(mockTxEvent.filterLog).toHaveBeenCalledTimes(1);
-      expect(mockTxEvent.filterLog).toHaveBeenCalledWith(
-        ERC20_TRANSFER_EVENT,
-        TETHER_ADDRESS
-      );
-    });
-  });
-});
+})
