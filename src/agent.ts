@@ -13,7 +13,7 @@ import {
 import { NETHERMIND_DEPLOYER_ADDRESS,FORTA_CONTRACT_ADDRESS,CREATE_AGENT } from "./utils";
 
 
-export function provideHandleTx(functionAbi: string, proxy: string, deployer: string) : HandleTransaction {
+export function provideHandleTransaction(functionAbi: string, proxy: string, deployer: string) : HandleTransaction {
   return async function handleTransaction(txEvent: TransactionEvent) {
     const findings: Finding[] = [];
 
@@ -57,7 +57,7 @@ export function provideHandleTx(functionAbi: string, proxy: string, deployer: st
 
 export default {
   // initialize,
-  handleTransaction: provideHandleTx(CREATE_AGENT,NETHERMIND_DEPLOYER_ADDRESS,FORTA_CONTRACT_ADDRESS),
+  handleTransaction: provideHandleTransaction(CREATE_AGENT,NETHERMIND_DEPLOYER_ADDRESS,FORTA_CONTRACT_ADDRESS),
   // handleBlock,
   // handleAlert
 };
